@@ -6,3 +6,5 @@ Enable=true
 
 [WiFi]
 Enable=true
+Tethering.Identifier=Frogmaker-gamebox
+Tethering.Passphrase=frogmaker
