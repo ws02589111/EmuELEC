@@ -6,6 +6,9 @@
 # Source predefined functions and variables
 . /etc/profile
 
+if [ ! -d /storage/.opt/ ] ; then
+	mkdir /storage/.opt/
+fi
 # DO NOT modify this file, if you need to use autostart please use /storage/.config/custom_start.sh 
 
 # Enable these 3 following lines to add a small boost in performance mostly for s912 devices but might work for others, but remember to keep an eye on the temp!
