@@ -10,14 +10,14 @@ case $1 in
 "EMUS")
 systemctl stop emustation
 /emuelec/scripts/ee_backup.sh b no
-find /storage -mindepth 1 \( ! -regex '^/storage/.config/emulationstation/themes.*' -a ! -regex '^/storage/.update.*' -a ! -regex '^/storage/download.*' -a ! -regex '^/storage/roms.*' \) -delete
+find /storage -mindepth 1 \( ! -regex '^/storage/.config/emulationstation/themes.*' -a ! -regex '^/storage/.update.*' -a ! -regex '^/storage/download.*' -a ! -regex '^/storage/roms.*' -a ! -regex '^/storage/.opt.*' \) -delete
 mkdir /storage/.config/
 sync
 systemctl reboot
   ;;
 "ALL")
 systemctl stop emustation
-find /storage -mindepth 1 \( ! -regex '^/storage/.update.*' -a ! -regex '^/storage/roms.*' \) -delete
+find /storage -mindepth 1 \( ! -regex '^/storage/.update.*' -a ! -regex '^/storage/roms.*' -a ! -regex '^/storage/.opt.*' \) -delete
 mkdir /storage/.config/
 sync
 systemctl reboot

@@ -15,13 +15,13 @@
 
 # Welcome Message for e.g. SSH Server (up to 5 Lines)
   GREETING0="##############################################"
-  GREETING1="#                 EmuELEC                    #"
+  GREETING1="#        EmuELEC Build By Frogmaker         #"
   GREETING2="#     Retro emulation for Amlogic Devices    #"
   GREETING3="#             Based on CoreELEC              #"
   GREETING4="##############################################"
 
 # Root password to integrate in the target system
-  ROOT_PASSWORD="emuelec"
+  ROOT_PASSWORD="frogmaker"
 
 # Install glibc locales to the build (yes / no)
   GLIBC_LOCALES="yes"
@@ -209,7 +209,7 @@
   ADDON_URL="$ADDON_SERVER_URL/$ADDON_PATH"
 
 # Default size of system partition, in MB, eg. 512
-  SYSTEM_SIZE=512
+  SYSTEM_SIZE=768
 # Default system partition offset, in sectors, eg. 2048
   SYSTEM_PART_START=8192
 

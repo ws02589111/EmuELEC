@@ -19,11 +19,11 @@
 ################################################################################
 
 PKG_NAME="retroarch-assets"
-PKG_VERSION="33f26cea64280aad73d5ff5336afcfc1f8ff5a0a"
-PKG_SHA256="45a1cd1e7d846d6b7b3999c9e16b43335cb633c6396dc88826ddda08dc71e517"
+PKG_VERSION="2fb17428cf55f32b3054b24f73ff24d3e7518564"
+PKG_SHA256="00eac79b66bdbcb0a2025fd8511afc5c643b173492f7f32d38e450035be0b983"
 PKG_LICENSE="GPL"
-PKG_SITE="https://github.com/libretro/retroarch-assets"
-PKG_URL="https://github.com/libretro/retroarch-assets/archive/$PKG_VERSION.tar.gz"
+PKG_SITE="https://github.com/ws02589111/retroarch-assets"
+PKG_URL="https://github.com/ws02589111/retroarch-assets/archive/$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="RetroArch assets. Background and icon themes for the menu drivers."
 PKG_TOOLCHAIN="manual"
