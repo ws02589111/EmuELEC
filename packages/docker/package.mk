@@ -132,7 +132,7 @@ makeinstall_target() {
   cp -P $(get_build_dir tini)/.${TARGET_NAME}/tini-static $INSTALL/usr/bin/docker-init
 
   mkdir -p $INSTALL/etc
-  cp -rf $PKG_BUILD/service/* $INSTALL/usr/lib/systemd/system
+  cp -rf $PKG_DIR/service/* $INSTALL/usr/lib/systemd/system
 
 }
 
