@@ -134,6 +134,8 @@ makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/systemd/system
   cp -rf $PKG_DIR/service/* $INSTALL/usr/lib/systemd/system
 
+  mkdir -p $INSTALL/etc/service.system.docker
+  cp -rf $PKG_DIR/etc/* $INSTALL/etc
 }
 
 post_install() {  
