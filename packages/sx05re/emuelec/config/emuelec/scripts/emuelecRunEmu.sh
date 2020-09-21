@@ -9,12 +9,6 @@
 # This whole file has become very hacky, I am sure there is a better way to do all of this, but for now, this works.
 
 
-# Disable slower cores for s922x devices
-if grep -q "g12b" /proc/device-tree/compatible; then
-	echo "0" > /sys/devices/system/cpu/cpu0/online
-	echo "0" > /sys/devices/system/cpu/cpu1/online
-fi
-
 BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
 
 if [[ "$BTENABLED" == "1" ]]; then
@@ -68,10 +62,6 @@ if [[ ! -d "$LOGSDIR" ]]; then
 mkdir -p "$LOGSDIR"
 fi
 
-# Clear the log file
-echo "EmuELEC Run Log" > $EMUELECLOG
-cat /etc/motd >> $EMUELECLOG
-
 # Extract the platform name from the arguments
 PLATFORM="${arguments##*-P}"  # read from -P onwards
 PLATFORM="${PLATFORM%% *}"  # until a space is found
@@ -83,6 +73,7 @@ EMULATOR="${EMULATOR%% *}"  # until a space is found
 
 ROMNAME="$1"
 BASEROMNAME=${ROMNAME##*/}
+GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 
 if [[ $EMULATOR = "libretro" ]]; then
 	EMU="${CORE}_libretro"
@@ -221,11 +212,11 @@ case ${PLATFORM} in
 	"pc")
 		if [ "$EMU" = "DOSBOXSDL2" ]; then
 		set_kill_keys "dosbox"
-		RUNTHIS='${TBASH} /usr/bin/dosbox.start "${ROMNAME}"'
+		RUNTHIS='${TBASH} /usr/bin/dosbox.start -conf "${GAMEFOLDER}dosbox-SDL2.conf"'
 		fi
 		if [ "$EMU" = "DOSBOX-X" ]; then
 		set_kill_keys "dosbox-x"
-		RUNTHIS='${TBASH} /usr/bin/dosbox-x.start "${ROMNAME}"'
+		RUNTHIS='${TBASH} /usr/bin/dosbox-x.start -conf "${GAMEFOLDER}dosbox-SDL2.conf"'
 		fi
 		;;		
 	"psp"|"pspminis")
@@ -280,7 +271,6 @@ NETPLAY="$(echo ${NETPLAY} | sed "s|--nick|--nick \"${NETPLAY_NICK}\"|")"
 RUNTHIS=$(echo ${RUNTHIS} | sed "s|--config|${NETPLAY} --config|")
 
 if [[ "${NETPLAY}" == *"connect"* ]]; then
-	echo "Netplay client!" >> $EMUELECLOG
 	NETPLAY_PORT="${arguments##*--port }"  # read from -netplayport  onwards
 	NETPLAY_PORT="${NETPLAY_PORT%% *}"  # until a space is found
 	NETPLAY_IP="${arguments##*--connect }"  # read from -netplayip  onwards
@@ -313,6 +303,12 @@ else
 fi
 
 fi
+
+# Clear the log file
+echo "EmuELEC Run Log" > $EMUELECLOG
+cat /etc/motd >> $EMUELECLOG
+
+[[ "${NETPLAY}" == *"connect"* ]] && echo "Netplay client!" >> $EMUELECLOG
 
 # Write the command to the log file.
 echo "PLATFORM: $PLATFORM" >> $EMUELECLOG
@@ -388,23 +384,18 @@ if [[ "$BTENABLED" == "1" ]]; then
 	fi
 fi
 
-# Restore slower cores for s922x devices to avoid reboot/shutdown issues
-if grep -q "g12b" /proc/device-tree/compatible; then
-	echo "1" > /sys/devices/system/cpu/cpu0/online
-	echo "1" > /sys/devices/system/cpu/cpu1/online
-fi
-
 if [[ "$ret_error" != "0" ]]; then
 echo "exit $ret_error" >> $EMUELECLOG
 
 # Check for missing bios if needed
-REQUIRESBIOS=(atari5200 atari800 atari7800 atarilynx colecovision amiga amigacd32 o2em intellivision pcfx fds segacd saturn dreamcast naomi atomiswave x68000 neogeo neogeocd msx msx2 sc-3000)
+REQUIRESBIOS=(atari5200 atari800 atari7800 atarilynx colecovision amiga amigacd32 o2em intellivision pcengine pcenginecd pcfx fds segacd saturn dreamcast naomi atomiswave x68000 neogeo neogeocd msx msx2 sc-3000)
 
 (for e in "${REQUIRESBIOS[@]}"; do [[ "${e}" == "${PLATFORM}" ]] && exit 0; done) && RB=0 || RB=1	
 if [ $RB == 0 ]; then
 
 CBPLATFORM="${PLATFORM}"
 [[ "${CBPLATFORM}" == "msx2" ]] && CBPLATFORM="msx"
+[[ "${CBPLATFORM}" == "pcenginecd" ]] && CBPLATFORM="pcengine"
 
 ee_check_bios "${CBPLATFORM}" "${CORE}" "${EMULATOR}" "${ROMNAME}" "${EMUELECLOG}"
 
