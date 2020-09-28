@@ -56,10 +56,9 @@ if [ -e /storage/.please_resize_me ] ; then
     StartProgress spinner "Checking file system... " "e2fsck -f -p $PART &>/dev/null"
     StartProgress spinner "Resizing file system... " "resize2fs $PART &>/dev/null"
     PARTSIZE=$(df -k $PART|awk 'NR==2{print $2}')
-    if [ $PARTSIZE -gt $LSIZE ]
-    then
+    if [ $PARTSIZE -gt $LSIZE ]; then
       StartProgress spinner "Remove reserved block... " "tune2fs -m 1 $PART &>/dev/null"
-    elif [ $PARTSIZE -gt $MSIZE ]
+    elif [ $PARTSIZE -gt $MSIZE ]; then
       StartProgress spinner "Remove reserved block... " "tune2fs -m 2 $PART &>/dev/null"
     fi
     StartProgress countdown "Rebooting in 15s...     " 15 "NOW"
