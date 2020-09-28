@@ -1288,6 +1288,18 @@ fi
 BACKUP_FILE=$(ls -1 /sysroot/storage/.restore/??????????????.tar 2>/dev/null | head -n 1)
 
 if [ -f /sysroot/storage/.please_resize_me ]; then
+  STORAGEPART=$(grep "/storage " /proc/mounts | cut -d" " -f1)
+  LSIZE=$(echo $[100*1024*1024])
+  MSIZE=$(echo $[50*1024*1024])
+  SSIZE=$(echo $[25*1024*1024])
+  STORAGEPARTSIZE=$(df -k $STORAGEPART|awk 'NR==2{print $2}')
+  if [ $STORAGEPARTSIZE -gt $LSIZE ]; then
+    StartProgress spinner "Remove reserved block... " "tune2fs -m 1 $STORAGEPART &>/dev/null"
+  elif [ $STORAGEPARTSIZE -gt $MSIZE ]; then
+    StartProgress spinner "Remove reserved block... " "tune2fs -m 2 $STORAGEPART &>/dev/null"
+  fi
+
+if [ -f /sysroot/storage/.please_resize_me ]; then
   INIT_UNIT="--unit=fs-resize.target"
 elif [ -f /sysroot/storage/.cache/reset_oe -o -f /sysroot/storage/.cache/reset_xbmc ]; then
   INIT_UNIT="--unit=factory-reset.target"
