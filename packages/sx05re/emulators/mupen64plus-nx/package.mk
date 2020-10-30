@@ -5,7 +5,7 @@ PKG_NAME="mupen64plus-nx"
 PKG_VERSION="ea1c677c1e61ce1d95809c09cf26ffa75cd7e9dc"
 PKG_SHA256="b2b06332523aef0fb44cb3b97cfab2122b627ca4ef11708b0e40c8699a2b288e"
 PKG_REV="1"
-PKG_ARCH="arm"
+PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/mupen64plus-libretro-nx"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
@@ -24,6 +24,7 @@ fi
 pre_configure_target() {
   sed -e "s|^GIT_VERSION ?.*$|GIT_VERSION := \" ${PKG_VERSION:0:7}\"|" -i Makefile
 
+if [ $ARCH == "arm" ]; then
 if [ ${PROJECT} = "Amlogic-ng" ]; then
 	PKG_MAKE_OPTS_TARGET+=" platform=AMLG12B"
 	sed -i "s|GLES = 1|GLES3 = 1|g" Makefile
@@ -34,9 +35,25 @@ elif [ "${DEVICE}" = "OdroidGoAdvance" ]; then
 	sed -i "s|GLES = 1|GLES3 = 1|g" Makefile
 	sed -i "s|-lGLESv2|-lGLESv3|g" Makefile
 	sed -i "s|cortex-a53|cortex-a35|g" Makefile
-	PKG_MAKE_OPTS_TARGET+=" platform=RK3328"
+	PKG_MAKE_OPTS_TARGET+=" platform=odroidgoa"
+	fi
+else
+	if [ ${PROJECT} = "Amlogic-ng" ]; then
+		PKG_MAKE_OPTS_TARGET+=" platform=odroid64 BOARD=N2"
+		sed -i "s|GLES = 1|GLES3 = 1|g" Makefile
+		sed -i "s|-lGLESv2|-lGLESv3|g" Makefile
+	elif [ "${PROJECT}" = "Amlogic" ]; then 
+		sed -i "s|GLES = 1|GLES = 1|g" Makefile
+		sed -i "s|-lGLESv2|-lGLESv2|g" Makefile
+		PKG_MAKE_OPTS_TARGET+=" platform=amlogic64"
+	elif [ "${DEVICE}" = "OdroidGoAdvance" ]; then
+		sed -i "s|GLES = 1|GLES3 = 1|g" Makefile
+		sed -i "s|-lGLESv2|-lGLESv3|g" Makefile
+		PKG_MAKE_OPTS_TARGET+=" platform=amlogic64"
+	fi
 fi
 }
+
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/libretro

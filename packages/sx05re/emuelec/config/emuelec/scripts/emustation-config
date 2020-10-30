@@ -30,7 +30,7 @@ ROMFILE="emuelecroms"
 if  [ ! -f "/storage/roms/$ROMFILE" ]; then
 
 # if the file is not present then we look for the file in connected USB media, and only return the first match 
-FULLPATHTOROMS="$(find /media/*/roms/ -name $ROMFILE -maxdepth 1 | head -n 1)"
+FULLPATHTOROMS="$(find /media/*/roms/ -name $ROMFILE* -maxdepth 1 | head -n 1)"
 
 if [[ -z "${FULLPATHTOROMS}" ]]; then
 # Can't find the ROMFILE, if the symlink exists, then remove it and restore the backup if it exists
@@ -123,5 +123,8 @@ if [[ -z "$NPID" ]]; then
 fi
 ) &
 fi 
+
+# Check if pico-8 was installed, if so create a dummy file
+[[ -e "/storage/roms/bios/pico-8" ]] && touch /storage/roms/pico-8/splore.p8
 
 exit 0

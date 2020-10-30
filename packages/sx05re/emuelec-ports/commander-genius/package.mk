@@ -3,7 +3,7 @@
 
 PKG_NAME="commander-genius"
 PKG_VERSION="4d7ce901f18e8acd46c52723c688356deefd905c"
-PKG_ARCH="arm"
+PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://gitlab.com/Dringgstein/Commander-Genius"
 PKG_URL="$PKG_SITE.git"

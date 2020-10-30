@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="retroarch"
-PKG_VERSION="b59c5f6ff9c439a3455cc1e74297f5173ba4cf04"
+PKG_VERSION="75abb44975da762c37a617a91baed31be8da8a76"
 PKG_SITE="https://github.com/libretro/RetroArch"
 PKG_URL="$PKG_SITE.git"
 PKG_LICENSE="GPLv3"
@@ -41,9 +41,11 @@ fi
 fi
 
 pre_configure_target() {
+# Retroarch does not like -O3 for CHD loading with cheevos
+export CFLAGS="`echo $CFLAGS | sed -e "s|-O.|-O2|g"`"
+
 TARGET_CONFIGURE_OPTS=""
-PKG_CONFIGURE_OPTS_TARGET="--enable-neon \
-                           --disable-qt \
+PKG_CONFIGURE_OPTS_TARGET="--disable-qt \
                            --enable-alsa \
                            --enable-udev \
                            --disable-opengl1 \
@@ -70,6 +72,10 @@ PKG_CONFIGURE_OPTS_TARGET+=" --disable-kms \
                            --enable-mali_fbdev"
 fi
 
+if [ $ARCH == "arm" ]; then
+PKG_CONFIGURE_OPTS_TARGET+=" --enable-neon"
+fi
+
 cd $PKG_BUILD
 }
 
@@ -86,6 +92,12 @@ makeinstall_target() {
   mkdir -p $INSTALL/usr/bin
   mkdir -p $INSTALL/etc
     cp $PKG_BUILD/retroarch $INSTALL/usr/bin
+
+if [[ "$ARCH" == "arm" ]] && [[ "$EMUELEC_ADDON" != "Yes" ]]; then
+    patchelf --set-interpreter /emuelec/lib32/ld-linux-armhf.so.3 $INSTALL/usr/bin/retroarch
+    mv $INSTALL/usr/bin/retroarch $INSTALL/usr/bin/retroarch32
+fi
+
     cp $PKG_BUILD/retroarch.cfg $INSTALL/etc
   mkdir -p $INSTALL/usr/share/video_filters
     cp $PKG_BUILD/gfx/video_filters/*.so $INSTALL/usr/share/video_filters
@@ -150,7 +162,7 @@ fi
   sed -i -e "s/# input_max_users = 16/input_max_users = 5/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# input_autodetect_enable = true/input_autodetect_enable = true/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# joypad_autoconfig_dir =/joypad_autoconfig_dir = \/tmp\/joypads/" $INSTALL/etc/retroarch.cfg
-  sed -i -e "s/# input_remapping_directory =/input_remapping_directory = \/storage\/.config\/retroarch\/remappings/" $INSTALL/etc/retroarch.cfg
+  sed -i -e "s/# input_remapping_directory =/input_remapping_directory = \/storage\/.config\/retroarch\/config\/remappings/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# input_menu_toggle_gamepad_combo = 0/input_menu_toggle_gamepad_combo = 2/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# all_users_control_menu = false/all_users_control_menu = true/" $INSTALL/etc/retroarch.cfg
 

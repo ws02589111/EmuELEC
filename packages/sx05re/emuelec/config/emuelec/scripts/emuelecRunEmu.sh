@@ -40,12 +40,19 @@ CFG="/storage/.emulationstation/es_settings.cfg"
 LOGEMU="No"
 VERBOSE=""
 LOGSDIR="/emuelec/logs"
-EMUELECLOG="$LOGSDIR/emuelec.log"
 TBASH="/usr/bin/bash"
 JSLISTENCONF="/emuelec/configs/jslisten.cfg"
 RATMPCONF="/tmp/retroarch/ee_retroarch.cfg"
 RATMPCONF="/storage/.config/retroarch/retroarch.cfg"
 NETPLAY="No"
+
+
+if [ $(get_es_setting string LogLevel) == "minimal" ]; then 
+    EMUELECLOG="/dev/null"
+    echo "Logging has been dissabled, enable it in Main Menu > System Settings > Developer > Log Level"
+else
+    EMUELECLOG="$LOGSDIR/emuelec.log"
+fi
 
 set_kill_keys() {
 	
@@ -209,6 +216,12 @@ case ${PLATFORM} in
 		RUNTHIS='${TBASH} /storage/.config/emuelec/scripts/hypseus.start.sh "${ROMNAME}"'
 		fi
 		;;
+	"wii"|"gamecube")
+		if [ "$EMU" = "dolphin" ]; then
+		set_kill_keys "dolphin-emu-nogui"
+		RUNTHIS='${TBASH} /storage/.config/emuelec/bin/dolphin.sh "${ROMNAME}"'
+		fi
+		;;
 	"pc")
 		if [ "$EMU" = "DOSBOXSDL2" ]; then
 		set_kill_keys "dosbox"
@@ -236,6 +249,10 @@ case ${PLATFORM} in
 		set_kill_keys "${EMU}"
 		RUNTHIS='${TBASH} /emuelec/scripts/fbterm.sh mplayer_video "${ROMNAME}" "${EMU}"'
 		;;
+	"pico8")
+		set_kill_keys "pico8_dyn"
+		RUNTHIS='${TBASH} /emuelec/scripts/pico8.sh "${ROMNAME}"'
+			;;
 	esac
 else
 # We are running a Libretro emulator set all the settings that we chose on ES
@@ -251,7 +268,16 @@ if [[ ${PLATFORM} == "ports" ]]; then
 	PORTSCRIPT="${arguments##*-SC}"  # read from -SC onwards
 fi
 
-RUNTHIS='/usr/bin/retroarch $VERBOSE -L /tmp/cores/${EMU}.so --config ${RATMPCONF} "${ROMNAME}"'
+# Check if we need retroarch 32 bits or 64 bits
+RABIN="retroarch"
+if [[ "${PLATFORM}" == "psx" ]] || [[ "${PLATFORM}" == "n64" ]]; then
+    if [[ "$CORE" == "pcsx_rearmed" ]] || [[ "$CORE" == "parallel_n64" ]]; then
+        RABIN="retroarch32" 
+        LD_LIBRARY_PATH="/emuelec/lib32:$LD_LIBRARY_PATH"
+    fi
+fi
+
+RUNTHIS='/usr/bin/${RABIN} $VERBOSE -L /tmp/cores/${EMU}.so --config ${RATMPCONF} "${ROMNAME}"'
 CONTROLLERCONFIG="${arguments#*--controllers=*}"
 CONTROLLERCONFIG="${CONTROLLERCONFIG%% --*}"  # until a -- is found
 CORE=${EMU%%_*}

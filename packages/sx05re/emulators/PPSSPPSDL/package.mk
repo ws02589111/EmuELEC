@@ -14,13 +14,20 @@ PKG_LONGDESC="PPSSPP Standalone"
 GET_HANDLER_SUPPORT="git"
 PKG_BUILD_FLAGS="+lto"
 
+
 PKG_CMAKE_OPTS_TARGET+="-DUSE_SYSTEM_FFMPEG=ON \
-                        -DARMV7=ON \
                         -DUSING_FBDEV=ON \
                         -DUSING_EGL=ON \
                         -DUSING_GLES2=ON \
                         -DUSING_X11_VULKAN=OFF \
                         -DUSE_DISCORD=OFF"
+
+if [ $ARCH == "aarch64" ]; then
+PKG_CMAKE_OPTS_TARGET+=" -DARM64=ON"
+else
+PKG_CMAKE_OPTS_TARGET+=" -DARMV7=ON"
+fi
+
 
 pre_configure_target() {
 if [ "$DEVICE" == "OdroidGoAdvance" ]; then

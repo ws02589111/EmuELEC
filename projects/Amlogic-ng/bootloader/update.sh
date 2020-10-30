@@ -51,6 +51,9 @@ for arg in $(cat /proc/cmdline); do
           *odroid_c4*)
             SUBDEVICE="Odroid_C4"
             ;;
+          *odroid_hc4*)
+            SUBDEVICE="Odroid_HC4"
+            ;;
           *lepotato)
             SUBDEVICE="LePotato"
             ;;
@@ -130,7 +133,7 @@ if [ -f $SYSTEM_ROOT/usr/share/bootloader/config.ini ]; then
   fi
 fi
 
-if [ "${SUBDEVICE}" == "Odroid_N2" -o "${SUBDEVICE}" == "Odroid_C4" ]; then
+if [ "${SUBDEVICE}" == "Odroid_N2" -o "${SUBDEVICE}" == "Odroid_C4" -o "${SUBDEVICE}" == "Odroid_HC4" ]; then
   if [ -f $SYSTEM_ROOT/usr/share/bootloader/hk-boot-logo-1080.bmp.gz ]; then
     echo "Updating boot logos..."
     cp -p $SYSTEM_ROOT/usr/share/bootloader/hk-boot-logo-1080.bmp.gz $BOOT_ROOT/boot-logo-1080.bmp.gz
@@ -191,3 +194,11 @@ mount -o ro,remount $BOOT_ROOT
 
 # Leave a hint that we just did an update
 echo "UPDATE" > /storage/.config/boot.hint
+
+# EmuELEC sync binaries and scripts
+echo "Updating scripts and binaries, please wait!..."
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SYSTEM_ROOT/usr/lib" 
+export PATH="$PATH:$SYSTEM_ROOT/usr/bin:$SYSTEM_ROOT/usr/config/emuelec/scripts:$SYSTEM_ROOT/usr/config/emuelec/bin" 
+export SYSTEM_ROOT="$SYSTEM_ROOT"
+$SYSTEM_ROOT/usr/config/emuelec/scripts/force_update.sh
+sync

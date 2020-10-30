@@ -18,15 +18,28 @@ pre_configure_target() {
 
   case ${PROJECT} in
     Amlogic)
+     if [ $ARCH == "arm" ]; then
         AMIBERRY_PLATFORM="AMLGX"
+     else 
+        AMIBERRY_PLATFORM="pi64"
+     fi
       ;;
     Amlogic-ng)
+    if [ $ARCH == "arm" ]; then
         AMIBERRY_PLATFORM="AMLG12B"
+     else
+         AMIBERRY_PLATFORM="n2"
+     fi
       ;;
   esac
  
 if [ "$DEVICE" == "OdroidGoAdvance" ]; then
+if [ $ARCH == "arm" ]; then
 AMIBERRY_PLATFORM="RK3326"
+else 
+AMIBERRY_PLATFORM="pi64"
+fi
+
 fi
 
 sed -i "s|AS     = as|AS     \?= as|" Makefile
