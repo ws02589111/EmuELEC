@@ -18,7 +18,7 @@ PKG_TOOLCHAIN="make"
 
 # Thanks to magicseb  Reicast SA now WORKS :D
 PKG_EXPERIMENTAL="munt nestopiaCV quasi88 xmil np2kai hypseus dosbox-x"
-PKG_EMUS="$LIBRETRO_CORES advancemame PPSSPPSDL amiberry hatarisa openbor dosbox-sdl2 mupen64plus-nx scummvmsa residualvm stellasa"
+PKG_EMUS="$LIBRETRO_CORES advancemame PPSSPPSDL amiberry hatarisa openbor dosbox-sdl2 mupen64plus-nx scummvmsa stellasa"
 PKG_TOOLS="ffmpeg libjpeg-turbo common-shaders scraper Skyscraper MC libretro-bash-launcher SDL_GameControllerDB linux-utils xmlstarlet CoreELEC-Debug-Scripts sixaxis jslisten evtest mpv poppler bluetool patchelf"
 PKG_RETROPIE_DEP="bash pyudev dialog six git dbus-python pygobject coreutils"
 PKG_DEPENDS_TARGET+=" $PKG_TOOLS $PKG_RETROPIE_DEP $PKG_EMUS $PKG_EXPERIMENTAL emuelec-ports"
@@ -26,19 +26,19 @@ PKG_DEPENDS_TARGET+=" $PKG_TOOLS $PKG_RETROPIE_DEP $PKG_EMUS $PKG_EXPERIMENTAL e
 # Removed cores for space and/or performance
 # PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET mame2015 fba4arm reicastsa reicastsa_old mba.mini.plus $LIBRETRO_EXTRA_CORES xow"
 
-# These packages are only meant for S922x, S905x2 and A311D devices as they run poorly on S905, S912, etc" 
+# These packages are only meant for S922x, S905x2 and A311D devices as they run poorly on S905" 
 if [ "$PROJECT" == "Amlogic-ng" ]; then
-PKG_DEPENDS_TARGET+=" $LIBRETRO_S922X_CORES mame2016 mesen"
+PKG_DEPENDS_TARGET+=" $LIBRETRO_S922X_CORES mame2016"
 fi
 
-if [ "$DEVICE" == "OdroidGoAdvance" ]; then
+if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
     PKG_DEPENDS_TARGET+=" kmscon odroidgoa-utils rs97-commander-sdl2"
     
     #we disable some cores that are not working or work poorly on OGA
     for discore in mesen-s virtualjaguar quicknes reicastsa_old reicastsa MC; do
         PKG_DEPENDS_TARGET=$(echo $PKG_DEPENDS_TARGET | sed "s|$discore||")
     done
-    PKG_DEPENDS_TARGET+=" opera yabasanshiro"
+    PKG_DEPENDS_TARGET+=" yabasanshiro"
 else
     PKG_DEPENDS_TARGET+=" fbterm"
 fi
@@ -93,7 +93,7 @@ makeinstall_target() {
       echo "s905" > $INSTALL/ee_s905
   fi
   
-  if [ "$DEVICE" == "OdroidGoAdvance" ]; then
+  if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
       echo "$DEVICE" > $INSTALL/ee_arch
   else
       echo "$PROJECT" > $INSTALL/ee_arch
@@ -155,11 +155,10 @@ cp -r $PKG_DIR/gamepads/* $INSTALL/etc/retroarch-joypad-autoconfig
 CORESFILE="$INSTALL/usr/config/emulationstation/es_systems.cfg"
 
 if [ "${PROJECT}" != "Amlogic-ng" ]; then
-    if [[ ${DEVICE} == "OdroidGoAdvance" ]]; then
+    if [[ ${DEVICE} == "OdroidGoAdvance" || "$DEVICE" == "GameForce" ]]; then
         remove_cores="mesen-s quicknes REICASTSA_OLD REICASTSA mame2016 mesen"
     elif [ "${PROJECT}" == "Amlogic" ]; then
         remove_cores="mesen-s quicknes mame2016 mesen"
-        xmlstarlet ed -L -P -d "/systemList/system[name='3do']" $CORESFILE
         xmlstarlet ed -L -P -d "/systemList/system[name='saturn']" $CORESFILE
     fi
     
@@ -171,7 +170,7 @@ if [ "${PROJECT}" != "Amlogic-ng" ]; then
 fi
 
   # Remove scripts from OdroidGoAdvance build
-	if [[ ${DEVICE} == "OdroidGoAdvance" ]]; then 
+	if [[ ${DEVICE} == "OdroidGoAdvance" || "$DEVICE" == "GameForce" ]]; then 
 	for i in "01 - Get ES Themes" "03 - wifi" "10 - Force Update" "04 - Configure Reicast" "06 - Sselphs scraper" "07 - Skyscraper" "09 - system info"; do 
 	xmlstarlet ed -L -P -d "/gameList/game[name='${i}']" $INSTALL/usr/config/emuelec/scripts/modules/gamelist.xml
 	rm "$INSTALL/usr/config/emuelec/scripts/modules/${i}.sh"

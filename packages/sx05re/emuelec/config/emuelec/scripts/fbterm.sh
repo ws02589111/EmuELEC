@@ -6,13 +6,9 @@
 . /etc/profile
 source /emuelec/scriptmodules/helpers.sh
 
-if [ -e /proc/device-tree/t82x@d00c0000/compatible ]; then
-	/emuelec/scripts/setres.sh 16
-fi
-
 EE_DEVICE=$(cat /ee_arch)
 
-if [ "$EE_DEVICE" == "OdroidGoAdvance" ]; then
+if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
 	#kmscon
 	if [[ "${1}" == *"13 - Launch Terminal (kb).sh"* ]]; then
 		kmscon --font-size 8 --login /usr/bin/login -- -p -f root 

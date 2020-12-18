@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="retroarch"
-PKG_VERSION="75abb44975da762c37a617a91baed31be8da8a76"
+PKG_VERSION="307a9ac01c4b3c828b9f9edb1f45b6d0ad758df7"
 PKG_SITE="https://github.com/libretro/RetroArch"
 PKG_URL="$PKG_SITE.git"
 PKG_LICENSE="GPLv3"
@@ -31,7 +31,11 @@ if [ ${PROJECT} = "Amlogic-ng" ]; then
   PKG_PATCH_DIRS="${PROJECT}"
 fi
 
-if [ "$DEVICE" == "OdroidGoAdvance" ]; then
+if [ ${PROJECT} = "Amlogic" ]; then
+  PKG_PATCH_DIRS="${PROJECT}"
+fi
+
+if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
 PKG_DEPENDS_TARGET+=" libdrm librga"
 fi
 
@@ -62,14 +66,17 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-qt \
                            --enable-sdl2 \
                            --enable-ffmpeg"
 
-if [ "$DEVICE" == "OdroidGoAdvance" ]; then
+if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
 PKG_CONFIGURE_OPTS_TARGET+=" --enable-opengles3 \
                            --enable-kms \
-                           --disable-mali_fbdev \
-                           --enable-odroidgo2"
+                           --disable-mali_fbdev"
 else
 PKG_CONFIGURE_OPTS_TARGET+=" --disable-kms \
                            --enable-mali_fbdev"
+fi
+
+if [ "$DEVICE" == "OdroidGoAdvance" ]; then
+PKG_CONFIGURE_OPTS_TARGET+=" --enable-odroidgo2"
 fi
 
 if [ $ARCH == "arm" ]; then
@@ -141,7 +148,7 @@ fi
   sed -i -e "s/# video_gpu_screenshot = true/video_gpu_screenshot = false/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# video_fullscreen = false/video_fullscreen = true/" $INSTALL/etc/retroarch.cfg
 
-if [ "$DEVICE" == "OdroidGoAdvance" ]; then
+if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
     echo "xmb_layout = 2" >> $INSTALL/etc/retroarch.cfg
     echo "menu_widget_scale_auto = false" >> $INSTALL/etc/retroarch.cfg
     echo "menu_widget_scale_factor = 2.00" >> $INSTALL/etc/retroarch.cfg

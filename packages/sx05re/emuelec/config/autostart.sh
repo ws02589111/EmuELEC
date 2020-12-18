@@ -11,7 +11,7 @@ if [ ! -d /storage/.opt/ ] ; then
 fi
 # DO NOT modify this file, if you need to use autostart please use /storage/.config/custom_start.sh 
 
-# Enable these 3 following lines to add a small boost in performance mostly for s912 devices but might work for others, but remember to keep an eye on the temp!
+# Enable these 3 following lines to add a small boost in performance but remember to keep an eye on the temp!
 # echo "performance" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 # echo "performance" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
 # echo 5 > /sys/class/mpgpu/cur_freq
@@ -29,6 +29,9 @@ BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
 if [[ "$BTENABLED" != "1" ]]; then
 systemctl stop bluetooth
 /storage/.cache/services/bluez.conf
+
+[[ "$EE_DEVICE" == "GameForce" ]] && rk_wifi_init /dev/ttyS1
+
 fi
 
 # copy default bezel to /storage/roms/bezel if it doesn't exists
