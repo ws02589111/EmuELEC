@@ -505,6 +505,10 @@ do_reboot() {
     /usr/bin/busybox umount /flash
   fi
 
+  if /usr/bin/busybox mountpoint -q ${UPDATE_ROOT} ; then
+    /usr/bin/busybox umount ${UPDATE_ROOT}
+  fi
+
   if /usr/bin/busybox mountpoint -q /storage/roms ; then
     /usr/bin/busybox umount /storage/roms
   fi
@@ -680,11 +684,22 @@ mount_storage() {
   fi
 }
 
+# EmuELEC specific
 mount_roms() {
 if /usr/bin/busybox mountpoint -q /storage ; then
     progress "Mounting roms"
+  if [ -L "/storage/roms" ]; then
+   /usr/bin/busybox rm /storage/roms > /dev/null 2>&1
+  fi
     /usr/bin/busybox mkdir -p /storage/roms > /dev/null 2>&1
-    mount -t vfat /dev/mmcblk0p3 /storage/roms > /dev/null 2>&1
+    mount -t vfat "LABEL=EEROMS" /storage/roms > /dev/null 2>&1
+
+# If mounting roms partition was succesful, we bind mount the update folder to use the third partition
+    if /usr/bin/busybox mountpoint -q /storage/roms ; then
+     /usr/bin/busybox mkdir -p /storage/roms/.update > /dev/null 2>&1
+     /usr/bin/busybox mkdir -p "$UPDATE_ROOT" > /dev/null 2>&1
+     mount --bind /storage/roms/.update "$UPDATE_ROOT" > /dev/null 2>&1
+    fi
 fi
 }
 

@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="retroarch"
-PKG_VERSION="307a9ac01c4b3c828b9f9edb1f45b6d0ad758df7"
+PKG_VERSION="7450f049e72dd3388dfed2439c1af73e088e4fd9"
 PKG_SITE="https://github.com/libretro/RetroArch"
 PKG_URL="$PKG_SITE.git"
 PKG_LICENSE="GPLv3"
@@ -37,6 +37,7 @@ fi
 
 if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
 PKG_DEPENDS_TARGET+=" libdrm librga"
+PKG_PATCH_DIRS="OdroidGoAdvance"
 fi
 
 # Pulseaudio Support
@@ -46,7 +47,7 @@ fi
 
 pre_configure_target() {
 # Retroarch does not like -O3 for CHD loading with cheevos
-export CFLAGS="`echo $CFLAGS | sed -e "s|-O.|-O2|g"`"
+export CFLAGS="$CFLAGS -O3 -fno-tree-vectorize"
 
 TARGET_CONFIGURE_OPTS=""
 PKG_CONFIGURE_OPTS_TARGET="--disable-qt \
@@ -120,9 +121,9 @@ fi
   sed -i -e "s/# content_database_path =/content_database_path =\/tmp\/database\/rdb/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# playlist_directory =/playlist_directory =\/storage\/playlists/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# savefile_directory =/# savefile_directory =\/storage\/savefiles/" $INSTALL/etc/retroarch.cfg
-  sed -i -e "s/# savestate_directory =/# savestate_directory =\/storage\/savestates/" $INSTALL/etc/retroarch.cfg
+  sed -i -e "s/# savestate_directory =/savestate_directory =\/storage\/roms\/savestates/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# system_directory =/system_directory =\/storage\/roms\/bios/" $INSTALL/etc/retroarch.cfg
-  sed -i -e "s/# screenshot_directory =/screenshot_directory =\/storage\/screenshots/" $INSTALL/etc/retroarch.cfg
+  sed -i -e "s/# screenshot_directory =/screenshot_directory =\/storage\/roms\/screenshots/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# video_shader_dir =/video_shader_dir =\/tmp\/shaders/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# rgui_show_start_screen = true/rgui_show_start_screen = false/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# assets_directory =/assets_directory =\/tmp\/assets/" $INSTALL/etc/retroarch.cfg
@@ -148,12 +149,6 @@ fi
   sed -i -e "s/# video_gpu_screenshot = true/video_gpu_screenshot = false/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# video_fullscreen = false/video_fullscreen = true/" $INSTALL/etc/retroarch.cfg
 
-if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
-    echo "xmb_layout = 2" >> $INSTALL/etc/retroarch.cfg
-    echo "menu_widget_scale_auto = false" >> $INSTALL/etc/retroarch.cfg
-    echo "menu_widget_scale_factor = 2.00" >> $INSTALL/etc/retroarch.cfg
-fi
-
   # Audio
   sed -i -e "s/# audio_driver =/audio_driver = \"alsathread\"/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# audio_filter_dir =/audio_filter_dir =\/usr\/share\/audio_filters/" $INSTALL/etc/retroarch.cfg
@@ -162,7 +157,7 @@ fi
   fi
 
   # Saving
-  echo "savestate_thumbnail_enable = \"false\"" >> $INSTALL/etc/retroarch.cfg
+  echo "savestate_thumbnail_enable = \"true\"" >> $INSTALL/etc/retroarch.cfg
   
   # Input
   sed -i -e "s/# input_driver = sdl/input_driver = udev/" $INSTALL/etc/retroarch.cfg
@@ -195,8 +190,9 @@ fi
   echo "playlist_entry_remove = \"false\"" >> $INSTALL/etc/retroarch.cfg
 
   #emuelec
+  sed -i -e "s/.*core_updater_buildbot_url =.*/core_updater_buildbot_url = \"http:\/\/dontupdatecores\"/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# input_hotkey_block_delay = \"5\"/input_hotkey_block_delay = \"5\"/" $INSTALL/etc/retroarch.cfg
-  sed -i -e "s/# menu_show_core_updater = true/menu_show_core_updater = false/" $INSTALL/etc/retroarch.cfg
+  sed -i -e "s/# menu_show_core_updater = true/\# DONT UPDATE CORES IT WILL BREAK EMUELEC! \n menu_show_core_updater = false/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# menu_show_online_updater = true/menu_show_online_updater = true/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# input_overlay_opacity = 1.0/input_overlay_opacity = 0.15/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# audio_volume = 0.0/audio_volume = "0.000000"/" $INSTALL/etc/retroarch.cfg
@@ -209,8 +205,20 @@ fi
   echo "input_player3_analog_dpad_mode = \"1\"" >> $INSTALL/etc/retroarch.cfg
   echo "input_player4_analog_dpad_mode = \"1\"" >> $INSTALL/etc/retroarch.cfg
   echo "savefiles_in_content_dir = \"true\"" >> $INSTALL/etc/retroarch.cfg
-  echo "savestates_in_content_dir = \"true\"" >> $INSTALL/etc/retroarch.cfg
- 
+  echo "savestates_in_content_dir = \"false\"" >> $INSTALL/etc/retroarch.cfg
+
+if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
+    echo "xmb_layout = 2" >> $INSTALL/etc/retroarch.cfg
+    echo "menu_widget_scale_auto = false" >> $INSTALL/etc/retroarch.cfg
+    echo "menu_widget_scale_factor = 2.00" >> $INSTALL/etc/retroarch.cfg
+    echo "menu_scale_factor = 1.000000" >> $INSTALL/etc/retroarch.cfg
+    echo "video_font_size = 12.000000" >> $INSTALL/etc/retroarch.cfg
+    echo "menu_rgui_shadows = true" >> $INSTALL/etc/retroarch.cfg
+    echo "rgui_aspect_ratio = 6" >> $INSTALL/etc/retroarch.cfg
+    echo "rgui_inline_thumbnails = true" >> $INSTALL/etc/retroarch.cfg
+    echo "input_max_users = 1" >> $INSTALL/etc/retroarch.cfg
+fi
+
   mkdir -p $INSTALL/usr/config/retroarch/
   mv $INSTALL/etc/retroarch.cfg $INSTALL/usr/config/retroarch/
   

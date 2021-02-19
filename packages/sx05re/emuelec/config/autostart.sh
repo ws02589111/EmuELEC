@@ -24,14 +24,35 @@ if [ ! -L "$CONFIG_DIR" ]; then
 ln -sf $CONFIG_DIR2 $CONFIG_DIR
 fi
 
+if [[ "$EE_DEVICE" == "GameForce" ]]; then
+LED=$(get_ee_setting bl_rgb)
+[ -z "${LED}" ] && LED="Off"
+/emuelec/scripts/odroidgoa_utils.sh bl "${LED}"
+
+LED=$(get_ee_setting gf_statusled)
+[ -z "${LED}" ] && LED="heartbeat"
+/emuelec/scripts/odroidgoa_utils.sh pl "${LED}"
+
+
+rk_wifi_init /dev/ttyS1
+fi
+
+if [[ "$EE_DEVICE" == "GameForce" ]] || [[ "$EE_DEVICE" == "OdroidGoAdvance" ]]; then
+    if [ -e "/flash/no_oc.oga" ]; then 
+        set_ee_setting ee_oga_oc disable
+        OGAOC=""
+    else
+        OGAOC=$(get_ee_setting ee_oga_oc)
+    fi
+[ -z "${OGAOC}" ] && OGAOC="Off"
+    /emuelec/scripts/odroidgoa_utils.sh oga_oc "${OGAOC}"
+fi
+
 BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
 
 if [[ "$BTENABLED" != "1" ]]; then
 systemctl stop bluetooth
 /storage/.cache/services/bluez.conf
-
-[[ "$EE_DEVICE" == "GameForce" ]] && rk_wifi_init /dev/ttyS1
-
 fi
 
 # copy default bezel to /storage/roms/bezel if it doesn't exists
@@ -41,10 +62,10 @@ cp -rf /usr/share/retroarch-overlays/bezels/* /storage/roms/bezels/
 fi
 
 # Restore config if backup exists
-BACKUPFILE="/storage/downloads/ee_backup_config.zip"
+BACKUPFILE="/storage/roms/backup/ee_backup_config.tar.gz"
 
 if [ -f ${BACKUPFILE} ]; then 
-	unzip -o ${BACKUPFILE} -d /
+	emuelec-utils ee_backup restore no
 	rm ${BACKUPFILE}
 fi
 

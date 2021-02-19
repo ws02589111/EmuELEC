@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="yabasanshiro"
-PKG_VERSION="73c676680f753e10bfd53ecaf01293ac34b4a678"
+PKG_VERSION="233a31827cd32ccec4803800cb2f554e1c363d78"
 PKG_GIT_CLONE_BRANCH="yabasanshiro"
 PKG_REV="1"
 PKG_ARCH="any"
@@ -35,9 +35,6 @@ PKG_TOOLCHAIN="make"
 GET_HANDLER_SUPPORT="git"
 
 pre_configure_target() { 
-  # For some reason linkin to GLESv2 gives error, so we link it to GLESv3
-  sed -i "s|-lGLESv2|-lGLESv3|g" $PKG_BUILD/yabause/src/libretro/Makefile.common 
-
 if [[ "$ARCH" == "arm" ]]; then
 if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
 		PKG_MAKE_OPTS_TARGET+=" -C yabause/src/libretro platform=RK3399"
@@ -46,7 +43,7 @@ if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
 		PKG_MAKE_OPTS_TARGET+=" -C yabause/src/libretro platform=AMLG12B"
 	fi
 else
-	if [[ "$DEVICE" == "OdroidGoAdvance" ]]; then
+if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
 		sed -i "s|-mtune=cortex-a73.cortex-a53|-mtune=cortex-a35|g" $PKG_BUILD/yabause/src/libretro/Makefile
 	fi
 	
