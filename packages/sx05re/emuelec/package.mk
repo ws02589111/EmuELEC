@@ -30,7 +30,7 @@ PKG_DEPENDS_TARGET+=" $LIBRETRO_S922X_CORES mame2016"
 fi
 
 if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
-    PKG_DEPENDS_TARGET+=" kmscon odroidgoa-utils rs97-commander-sdl2"
+    PKG_DEPENDS_TARGET+=" kmscon odroidgoa-utils"
     
     #we disable some cores that are not working or work poorly on OGA
     for discore in mesen-s virtualjaguar quicknes reicastsa_old reicastsa MC; do
@@ -60,16 +60,27 @@ if [ "$PROJECT" == "Amlogic-ng" ]; then
     cd $PKG_BUILD/fbfix
     $CC -O2 fbfix.c -o fbfix
 fi
+
+cp -r $PKG_DIR/gptokeyb* $PKG_BUILD/
+cd $PKG_BUILD/gptokeyb
+# $CC $CFLAGS $LDFLAGS -I$SYSROOT_PREFIX/usr/include/libevdev-1.0 -I$SYSROOT_PREFIX/usr/include/libxml2 -W -Wall gptokeyb.c -o gptokeyb -levdev -lxml2 -L$SYSROOT_PREFIX/usr/lib
+# $CC $CFLAGS $LDFLAGS -I$SYSROOT_PREFIX/usr/include/libevdev-1.0 -W -Wall gptokeyb.c -o gptokeyb -levdev -L$SYSROOT_PREFIX/usr/lib
+$CXX $CFLAGS $LDFLAGS -I$SYSROOT_PREFIX/usr/include/libevdev-1.0 gptokeyb.cpp -o gptokeyb `$SYSROOT_PREFIX/usr/bin/sdl2-config --cflags --libs` -levdev
 }
+
 
 makeinstall_target() {
    
-    if [ "$PROJECT" == "Amlogic-ng" ]; then
-    mkdir -p $INSTALL/usr/config/emuelec/bin
-    cp $PKG_BUILD/fbfix/fbfix $INSTALL/usr/config/emuelec/bin
-    fi
+	mkdir -p $INSTALL/usr/bin
+	cp -rf $PKG_DIR/bin $INSTALL/usr
 
-  mkdir -p $INSTALL/usr/config/
+    if [ "$PROJECT" == "Amlogic-ng" ]; then
+    	cp $PKG_BUILD/fbfix/fbfix $INSTALL/usr/bin
+    fi
+	
+	cp $PKG_BUILD/gptokeyb/gptokeyb $INSTALL/usr/bin
+
+	mkdir -p $INSTALL/usr/config/
     cp -rf $PKG_DIR/config/* $INSTALL/usr/config/
     ln -sf /storage/.config/emuelec $INSTALL/emuelec
     find $INSTALL/usr/config/emuelec/ -type f -exec chmod o+x {} \;
@@ -81,11 +92,9 @@ makeinstall_target() {
         mv $INSTALL/usr/config/asound.conf-amlogic-ng $INSTALL/usr/config/asound.conf
     fi 
   
-  mkdir -p $INSTALL/usr/config/emuelec/logs
-  ln -sf /var/log $INSTALL/usr/config/emuelec/logs/var-log
+	mkdir -p $INSTALL/usr/config/emuelec/logs
+	ln -sf /var/log $INSTALL/usr/config/emuelec/logs/var-log
     
-  mkdir -p $INSTALL/usr/bin/
-  
   # leave for compatibility
   if [ "$PROJECT" == "Amlogic" ]; then
       echo "s905" > $INSTALL/ee_s905
@@ -97,13 +106,6 @@ makeinstall_target() {
       echo "$PROJECT" > $INSTALL/ee_arch
   fi
 
-  FILES=$INSTALL/usr/config/emuelec/scripts/*
-    for f in $FILES 
-    do
-    FI=$(basename $f)
-    ln -sf "/storage/.config/emuelec/scripts/$FI" $INSTALL/usr/bin/
-  done
-
   mkdir -p $INSTALL/usr/share/retroarch-overlays
     cp -r $PKG_DIR/overlay/* $INSTALL/usr/share/retroarch-overlays
   
@@ -112,9 +114,9 @@ makeinstall_target() {
     
   mkdir -p $INSTALL/usr/share/libretro-database
      touch $INSTALL/usr/share/libretro-database/dummy
-
-# Move plymouth-lite bin to show splash screen
-cp $(get_build_dir plymouth-lite)/.install_init/usr/bin/ply-image $INSTALL/usr/bin
+   
+   # Make sure all scripts and binaries are executable  
+   find $INSTALL/usr/bin -type f -exec chmod +x {} \;
 }
 
 post_install() {
@@ -170,12 +172,12 @@ fi
 
   # Remove scripts from OdroidGoAdvance build
 	if [[ ${DEVICE} == "OdroidGoAdvance" || "$DEVICE" == "GameForce" ]]; then 
-	for i in "01 - Get ES Themes" "03 - wifi" "10 - Force Update" "04 - Configure Reicast" "06 - Sselphs scraper" "07 - Skyscraper" "09 - system info"; do 
-	xmlstarlet ed -L -P -d "/gameList/game[name='${i}']" $INSTALL/usr/config/emuelec/scripts/modules/gamelist.xml
-	rm "$INSTALL/usr/config/emuelec/scripts/modules/${i}.sh"
+	for i in "wifi" "sselphs_scraper" "skyscraper" "system_info"; do 
+	xmlstarlet ed -L -P -d "/gameList/game[name='${i}']" $INSTALL/usr/bin/scripts/setup/gamelist.xml
+	rm "$INSTALL/usr/bin/scripts/setup/${i}.sh"
 	done
 	fi 
+
 #For automatic updates we use the buildate
 	date +"%m%d%Y" > $INSTALL/usr/buildate
-
 } 
