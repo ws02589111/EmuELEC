@@ -19,7 +19,7 @@ else
 	EE_ARCH=$TARGET_ARCH
 fi
 
-PKG_CONFIGURE_OPTS_TARGET="--enable-arch=arm64 \
+PKG_CONFIGURE_OPTS_TARGET="--enable-arch=$EE_ARCH \
                            --with-default-egl-platform=fbdev \
                            --with-android-headers=$BUILD/android-headers-25 \
                            --with-default-hybris-ld-library-path=/system/lib \
